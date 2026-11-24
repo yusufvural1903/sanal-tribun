@@ -343,7 +343,7 @@
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, totalH);
 
-    // Yuvarlak Avatar (68px - referans yakın çekim oranında)
+    // Yuvarlak Avatar (68px)
     ctx.save();
     ctx.beginPath();
     ctx.arc(PAD_X + avatarSize / 2, PAD_TOP + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
@@ -360,7 +360,7 @@
     }
     ctx.restore();
 
-    // İsim + Mavi Tik (Referans görseldeki büyük ve kalın oranlar)
+    // İsim + Mavi Tik
     const nameX = PAD_X + avatarSize + 15;
     const nameY = PAD_TOP + 27;
     ctx.fillStyle = '#0f1419';
@@ -380,7 +380,7 @@
     ctx.fill(badgePath);
     ctx.restore();
 
-    // Kullanıcı Adı (@SanalTribun - 17.5px ve yakın dikey hiza)
+    // Kullanıcı Adı (@SanalTribun)
     ctx.fillStyle = '#536471';
     if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.1px';
     ctx.font = '400 17.5px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif';
@@ -388,12 +388,12 @@
 
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
-    // Sağ Üst Üç Nokta (•••)
-    ctx.fillStyle = '#536471';
-    const dotY = PAD_TOP + 22;
-    [W - PAD_X - 15, W - PAD_X - 8.5, W - PAD_X - 2].forEach(dx => {
+    // Sağ Üst Üç Nokta (••• - Referans yakın çekimdeki dolgunluk ve aralık)
+    ctx.fillStyle = '#5b6873';
+    const dotY = PAD_TOP + 21;
+    [W - PAD_X - 18, W - PAD_X - 10.5, W - PAD_X - 3].forEach(dx => {
       ctx.beginPath();
-      ctx.arc(dx, dotY, 1.6, 0, Math.PI * 2);
+      ctx.arc(dx, dotY, 2.1, 0, Math.PI * 2);
       ctx.fill();
     });
 
