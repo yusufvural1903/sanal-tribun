@@ -90,9 +90,9 @@
     </div>
     <div>
       <div class="row-between">
-        <label>Logo Zoom: %<span id="logoZoomVal">104</span></label>
+        <label>Logo Zoom: %<span id="logoZoomVal">102</span></label>
       </div>
-      <input type="range" id="logoZoomSlider" min="100" max="180" step="1" value="104">
+      <input type="range" id="logoZoomSlider" min="95" max="180" step="1" value="102">
     </div>
   </div>
 
@@ -159,7 +159,7 @@
   let currentRatio = 4 / 3;
   let latestDataUrl = '';
 
-  const savedZoom = localStorage.getItem('st_logo_zoom_v2');
+  const savedZoom = localStorage.getItem('st_logo_zoom_v3');
   if (savedZoom) {
     logoZoomSlider.value = savedZoom;
     logoZoomVal.textContent = savedZoom;
@@ -192,7 +192,7 @@
 
   logoZoomSlider.addEventListener('input', () => {
     logoZoomVal.textContent = logoZoomSlider.value;
-    localStorage.setItem('st_logo_zoom_v2', logoZoomSlider.value);
+    localStorage.setItem('st_logo_zoom_v3', logoZoomSlider.value);
     renderCard();
   });
 
@@ -322,7 +322,7 @@
     ctx.font = `450 ${fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif`;
     const lines = wrapText(ctx, rawText, CONTENT_W);
 
-    const avatarSize = 58;
+    const avatarSize = 68;
     const textTop = PAD_TOP + avatarSize + 13;
     const textBlockH = lines.length * lineHeight;
 
@@ -343,7 +343,7 @@
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, totalH);
 
-    // Yuvarlak Avatar (58px + varsayılan %104 doluluk)
+    // Yuvarlak Avatar (68px - referans yakın çekim oranında)
     ctx.save();
     ctx.beginPath();
     ctx.arc(PAD_X + avatarSize / 2, PAD_TOP + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
@@ -360,40 +360,40 @@
     }
     ctx.restore();
 
-    // İsim + Mavi Tik (Orijinal Twinote dikey ve yatay oranları)
-    const nameX = PAD_X + avatarSize + 12;
-    const nameY = PAD_TOP + 22;
+    // İsim + Mavi Tik (Referans görseldeki büyük ve kalın oranlar)
+    const nameX = PAD_X + avatarSize + 15;
+    const nameY = PAD_TOP + 27;
     ctx.fillStyle = '#0f1419';
-    if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.2px';
-    ctx.font = '700 16.5px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif';
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.3px';
+    ctx.font = '800 19.5px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif';
     ctx.fillText('Sanal Tribün', nameX, nameY);
 
     const nameWidth = ctx.measureText('Sanal Tribün').width;
-    const badgeX = nameX + nameWidth + 4.5;
-    const badgeY = PAD_TOP + 8;
+    const badgeX = nameX + nameWidth + 3.5;
+    const badgeY = PAD_TOP + 10.5;
 
     ctx.save();
     ctx.translate(badgeX, badgeY);
-    ctx.scale(18.5 / 24, 18.5 / 24);
+    ctx.scale(21 / 24, 21 / 24);
     ctx.fillStyle = '#1d9bf0';
     const badgePath = new Path2D("M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z");
     ctx.fill(badgePath);
     ctx.restore();
 
-    // Kullanıcı Adı (@SanalTribun)
+    // Kullanıcı Adı (@SanalTribun - 17.5px ve yakın dikey hiza)
     ctx.fillStyle = '#536471';
     if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.1px';
-    ctx.font = '400 15px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif';
-    ctx.fillText('@SanalTribun', nameX, PAD_TOP + 42);
+    ctx.font = '400 17.5px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText('@SanalTribun', nameX, PAD_TOP + 51);
 
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
     // Sağ Üst Üç Nokta (•••)
     ctx.fillStyle = '#536471';
-    const dotY = PAD_TOP + 18;
-    [W - PAD_X - 14, W - PAD_X - 8, W - PAD_X - 2].forEach(dx => {
+    const dotY = PAD_TOP + 22;
+    [W - PAD_X - 15, W - PAD_X - 8.5, W - PAD_X - 2].forEach(dx => {
       ctx.beginPath();
-      ctx.arc(dx, dotY, 1.5, 0, Math.PI * 2);
+      ctx.arc(dx, dotY, 1.6, 0, Math.PI * 2);
       ctx.fill();
     });
 
