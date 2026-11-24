@@ -368,4 +368,86 @@
 
     const nameWidth = ctx.measureText('Sanal Tribün').width;
     const badgeX = nameX + nameWidth + 4;
-    const badgeY = PAD_TOP +
+    const badgeY = PAD_TOP + 10.5;
+
+    ctx.save();
+    ctx.translate(badgeX, badgeY);
+    ctx.scale(17.5 / 24, 17.5 / 24);
+    ctx.fillStyle = '#1d9bf0';
+    const badgePath = new Path2D("M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z");
+    ctx.fill(badgePath);
+    ctx.restore();
+
+    ctx.fillStyle = '#536471';
+    ctx.font = '400 14.5px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('@SanalTribun', nameX, PAD_TOP + 44);
+
+    ctx.fillStyle = '#536471';
+    const dotY = PAD_TOP + 20;
+    [W - PAD_X - 14, W - PAD_X - 8, W - PAD_X - 2].forEach(dx => {
+      ctx.beginPath();
+      ctx.arc(dx, dotY, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.fillStyle = '#0f1419';
+    ctx.font = `450 ${fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif`;
+    lines.forEach((line, idx) => {
+      ctx.fillText(line, PAD_X, textTop + fontSize + idx * lineHeight);
+    });
+
+    if (croppedPhotoImg) {
+      ctx.save();
+      roundRect(ctx, PAD_X, photoTop, CONTENT_W, photoH, 14);
+      ctx.clip();
+      ctx.drawImage(croppedPhotoImg, PAD_X, photoTop, CONTENT_W, photoH);
+      ctx.strokeStyle = '#eff3f4';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.restore();
+
+    latestDataUrl = canvas.toDataURL('image/jpeg', 0.98);
+    previewImg.src = latestDataUrl;
+    if (document.getElementById('previewModal').style.display === 'flex') {
+      fullPreviewImg.src = latestDataUrl;
+    }
+  }
+
+  function triggerDirectDownload(fileName) {
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = latestDataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function exportHD() {
+    const fileName = 'sanal-tribun-' + Date.now() + '.jpg';
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile && navigator.share) {
+      canvas.toBlob(async blob => {
+        const file = new File([blob], fileName, { type: 'image/jpeg' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file] });
+            return;
+          } catch (err) {
+            if (err.name === 'AbortError') return;
+          }
+        }
+        triggerDirectDownload(fileName);
+      }, 'image/jpeg', 0.98);
+    } else {
+      triggerDirectDownload(fileName);
+    }
+  }
+
+  renderCard();
+</script>
+</body>
+</html>
