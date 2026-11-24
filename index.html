@@ -11,7 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; background: #000; color: #fff; margin: 0; padding: env(safe-area-inset-top, 14px) 14px 44px; display: flex; flex-direction: column; align-items: center; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; background: #000; color: #fff; margin: 0; padding: env(safe-area-inset-top, 14px) 14px 44px; display: flex; flex-direction: column; align-items: center; }
   .top-bar { width: 100%; max-width: 540px; display: flex; justify-content: space-between; align-items: center; padding: 10px 4px 14px; }
   .brand { font-size: 17px; font-weight: 800; color: #facc15; letter-spacing: -0.3px; }
   .pill-btn { background: #1c1c1e; color: #e5e5ea; border: 1px solid #2c2c2e; padding: 7px 13px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; }
@@ -90,9 +90,9 @@
     </div>
     <div>
       <div class="row-between">
-        <label>Logo Zoom: %<span id="logoZoomVal">100</span></label>
+        <label>Logo Zoom: %<span id="logoZoomVal">104</span></label>
       </div>
-      <input type="range" id="logoZoomSlider" min="100" max="180" step="2" value="100">
+      <input type="range" id="logoZoomSlider" min="100" max="180" step="1" value="104">
     </div>
   </div>
 
@@ -159,7 +159,7 @@
   let currentRatio = 4 / 3;
   let latestDataUrl = '';
 
-  const savedZoom = localStorage.getItem('st_logo_zoom');
+  const savedZoom = localStorage.getItem('st_logo_zoom_v2');
   if (savedZoom) {
     logoZoomSlider.value = savedZoom;
     logoZoomVal.textContent = savedZoom;
@@ -192,7 +192,7 @@
 
   logoZoomSlider.addEventListener('input', () => {
     logoZoomVal.textContent = logoZoomSlider.value;
-    localStorage.setItem('st_logo_zoom', logoZoomSlider.value);
+    localStorage.setItem('st_logo_zoom_v2', logoZoomSlider.value);
     renderCard();
   });
 
@@ -319,11 +319,11 @@
 
     const rawText = textInput.value.trim() ? textInput.value : "Shakhtar Donetsk, Stamford Bridge'de oynayacağı Şampiyonlar Ligi maçları için kombine satışı yaptı.\n\nBunların 20 binini Fenerbahçeli taraftarlar satın aldı. Maçta tribünler yarı yarıya olacak.\n\n🗞️ (Akşam)";
 
-    ctx.font = `450 ${fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `450 ${fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif`;
     const lines = wrapText(ctx, rawText, CONTENT_W);
 
-    const avatarSize = 56;
-    const textTop = PAD_TOP + avatarSize + 14;
+    const avatarSize = 58;
+    const textTop = PAD_TOP + avatarSize + 13;
     const textBlockH = lines.length * lineHeight;
 
     let photoH = 0;
@@ -343,59 +343,68 @@
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, totalH);
 
-    const avatarSizeVal = 56;
+    // Yuvarlak Avatar (58px + varsayılan %104 doluluk)
     ctx.save();
     ctx.beginPath();
-    ctx.arc(PAD_X + avatarSizeVal / 2, PAD_TOP + avatarSizeVal / 2, avatarSizeVal / 2, 0, Math.PI * 2);
+    ctx.arc(PAD_X + avatarSize / 2, PAD_TOP + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
     ctx.closePath();
     ctx.clip();
     if (hasLogo) {
       const zoom = parseFloat(logoZoomSlider.value) / 100;
-      const drawSize = avatarSizeVal * zoom;
-      const offset = (drawSize - avatarSizeVal) / 2;
+      const drawSize = avatarSize * zoom;
+      const offset = (drawSize - avatarSize) / 2;
       ctx.drawImage(logoImg, PAD_X - offset, PAD_TOP - offset, drawSize, drawSize);
     } else {
       ctx.fillStyle = '#facc15';
-      ctx.fillRect(PAD_X, PAD_TOP, avatarSizeVal, avatarSizeVal);
+      ctx.fillRect(PAD_X, PAD_TOP, avatarSize, avatarSize);
     }
     ctx.restore();
 
-    const nameX = PAD_X + avatarSizeVal + 11;
-    const nameY = PAD_TOP + 24;
+    // İsim + Mavi Tik (Orijinal Twinote dikey ve yatay oranları)
+    const nameX = PAD_X + avatarSize + 12;
+    const nameY = PAD_TOP + 22;
     ctx.fillStyle = '#0f1419';
-    ctx.font = '700 16px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif';
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.2px';
+    ctx.font = '700 16.5px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif';
     ctx.fillText('Sanal Tribün', nameX, nameY);
 
     const nameWidth = ctx.measureText('Sanal Tribün').width;
-    const badgeX = nameX + nameWidth + 4;
-    const badgeY = PAD_TOP + 10.5;
+    const badgeX = nameX + nameWidth + 4.5;
+    const badgeY = PAD_TOP + 8;
 
     ctx.save();
     ctx.translate(badgeX, badgeY);
-    ctx.scale(17.5 / 24, 17.5 / 24);
+    ctx.scale(18.5 / 24, 18.5 / 24);
     ctx.fillStyle = '#1d9bf0';
     const badgePath = new Path2D("M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z");
     ctx.fill(badgePath);
     ctx.restore();
 
+    // Kullanıcı Adı (@SanalTribun)
     ctx.fillStyle = '#536471';
-    ctx.font = '400 14.5px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif';
-    ctx.fillText('@SanalTribun', nameX, PAD_TOP + 44);
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.1px';
+    ctx.font = '400 15px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText('@SanalTribun', nameX, PAD_TOP + 42);
 
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+
+    // Sağ Üst Üç Nokta (•••)
     ctx.fillStyle = '#536471';
-    const dotY = PAD_TOP + 20;
+    const dotY = PAD_TOP + 18;
     [W - PAD_X - 14, W - PAD_X - 8, W - PAD_X - 2].forEach(dx => {
       ctx.beginPath();
       ctx.arc(dx, dotY, 1.5, 0, Math.PI * 2);
       ctx.fill();
     });
 
+    // Haber Metni
     ctx.fillStyle = '#0f1419';
-    ctx.font = `450 ${fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `450 ${fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif`;
     lines.forEach((line, idx) => {
       ctx.fillText(line, PAD_X, textTop + fontSize + idx * lineHeight);
     });
 
+    // Yuvarlatılmış Fotoğraf
     if (croppedPhotoImg) {
       ctx.save();
       roundRect(ctx, PAD_X, photoTop, CONTENT_W, photoH, 14);
