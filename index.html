@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Sanal Tribün" />
+    <title>Sanal Tribün Studio</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+          sans-serif;
+        background: #000;
+        color: #fff;
+        margin: 0;
+        padding: env(safe-area-inset-top, 14px) 14px 44px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .top-bar {
+        width: 100%;
+        max-width: 540px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 4px 14px;
+      }
+      .brand {
+        font-size: 17px;
+        font-weight: 800;
+        color: #facc15;
+        letter-spacing: -0.3px;
+      }
+      .pill-btn {
+        background: #1c1c1e;
+        color: #e5e5ea;
+        border: 1px solid #2c2c2e;
+        padding: 7px 13px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .card-wrap {
+        width: 100%;
+        max-width: 540px;
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        margin-bottom: 10px;
+        position: relative;
+        cursor: zoom-in;
+      }
+      #previewImg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      .zoom-badge {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.65);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 20px;
+        backdrop-filter: blur(6px);
+        pointer-events: none;
+      }
+
+      .panel {
+        width: 100%;
+        max-width: 540px;
+        background: #1c1c1e;
+        padding: 14px;
+        border-radius: 16px;
+      }
+      .row-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      label {
+        font-size: 12px;
+        color: #98989d;
+        font-weight: 600;
+      }
+      .clear-text {
+        background: none;
+        border: none;
+        color: #ff453a;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 0;
+        cursor: pointer;
+      }
+
+      textarea {
+        width: 100%;
+        height: 105px;
+        border-radius: 12px;
+        border: 1px solid #2c2c2e;
+        background: #121214;
+        color: #fff;
+        padding: 12px;
+        font-size: 16px;
+        line-height: 1.35;
+        resize: vertical;
+        font-family: inherit;
+      }
+      textarea:focus {
+        outline: none;
+        border-color: #1d9bf0;
+      }
+
+      .slider-box {
+        margin: 12px 0;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: #1d9bf0;
+        margin-top: 4px;
+      }
+
+      .action-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .btn {
+        padding: 13px;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        text-align: center;
+      }
+      .btn-photo {
+        background: #2c2c2e;
+        color: #fff;
+      }
+      .btn-recrop {
+        background: #2c2c2e;
+        color: #30d158;
+        display: none;
+      }
+      .btn-remove {
+        background: #2c2c2e;
+        color: #ff453a;
+        display: none;
+      }
+      .btn-preview {
+        background: #2c2c2e;
+        color: #e5e5ea;
+      }
+      .btn-save {
+        background: #1d9bf0;
+        color: #fff;
+        font-size: 15px;
+      }
+      input[type="file"] {
+        display: none;
+      }
+
+      /* Tam Ekran Kırpma Modalı */
+      #cropModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: #000;
+        z-index: 999;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: env(safe-area-inset-top, 16px) 16px
+          env(safe-area-inset-bottom, 20px);
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 10px;
+      }
+      .modal-title {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .crop-stage {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: #111;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .crop-stage img {
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+      }
+      .ratio-bar {
+        display: flex;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .ratio-btn {
+        flex: 1;
+        padding: 10px;
+        background: #1c1c1e;
+        color: #ccc;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .ratio-btn.active {
+        background: #1d9bf0;
+        color: #fff;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .btn-cancel {
+        flex: 0.4;
+        background: #2c2c2e;
+        color: #fff;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-apply {
+        flex: 1;
+        background: #30d158;
+        color: #000;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      /* Tam Ekran Görüntü Önizleme Modalı */
+      #previewModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.94);
+        z-index: 1000;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: env(safe-area-inset-top, 16px) 16px
+          env(safe-area-inset-bottom, 24px);
+      }
+      .preview-stage {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: auto;
+        padding: 10px 0;
+      }
+      .preview-stage img {
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 12px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar">
+      <div class="brand">SANAL TRİBÜN</div>
+      <label for="logoInput" class="pill-btn">Logo Seç / Değiştir</label>
+      <input type="file" id="logoInput" accept="image/*" />
+    </div>
+
+    <!-- Canlı Kart Önizleme -->
+    <div class="card-wrap" onclick="openPreviewModal()">
+      <img id="previewImg" src="" alt="Önizleme" />
+      <div class="zoom-badge">Büyütmek için dokun</div>
+    </div>
+
+    <!-- Gizli Yüksek Çözünürlüklü Çizim Tuvali -->
+    <canvas id="renderCanvas" style="display: none"></canvas>
+
+    <div class="panel">
+      <div class="row-between">
+        <label>Haber Metni</label>
+        <button type="button" class="clear-text" onclick="clearText()">
+          Metni Temizle
+        </button>
+      </div>
+      <textarea
+        id="textInput"
+        placeholder="Haber metnini buraya yapıştır..."
+      ></textarea>
+
+      <div class="slider-box">
+        <div class="row-between">
+          <label>Yazı Boyutu: <span id="fontVal">17</span> px</label>
+        </div>
+        <input
+          type="range"
+          id="fontSlider"
+          min="14"
+          max="22"
+          step="0.5"
+          value="17"
+        />
+      </div>
+
+      <div class="action-grid" id="photoControls">
+        <label
+          for="photoInput"
+          class="btn btn-photo"
+          id="selectPhotoBtn"
+          style="grid-column: 1 / -1"
+          >+ Fotoğraf Ekle</label
+        >
+        <button
+          type="button"
+          class="btn btn-recrop"
+          id="recropBtn"
+          onclick="openCropModal()"
+        >
+          Yeniden Kırp
+        </button>
+        <button
+          type="button"
+          class="btn btn-remove"
+          id="removeBtn"
+          onclick="removePhoto()"
+        >
+          Fotoğrafı Sil
+        </button>
+        <button
+          type="button"
+          class="btn btn-preview"
+          onclick="openPreviewModal()"
+        >
+          Tam Ekran Önizle
+        </button>
+        <button type="button" class="btn btn-save" onclick="exportHD()">
+          Kaydet / İndir
+        </button>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" />
+    </div>
+
+    <!-- Kırpma Modalı -->
+    <div id="cropModal">
+      <div class="modal-header">
+        <span class="modal-title">Fotoğrafı Kırp</span>
+        <span style="font-size: 12px; color: #8e8e93"
+          >Yakınlaştır ve sürükle</span
+        >
+      </div>
+      <div class="crop-stage">
+        <img id="cropTarget" src="" alt="" />
+      </div>
+      <div class="ratio-bar">
+        <button
+          type="button"
+          class="ratio-btn active"
+          onclick="setRatio(4 / 3, this)"
+        >
+          4:3
+        </button>
+        <button
+          type="button"
+          class="ratio-btn"
+          onclick="setRatio(16 / 9, this)"
+        >
+          16:9
+        </button>
+        <button type="button" class="ratio-btn" onclick="setRatio(1, this)">
+          1:1
+        </button>
+        <button type="button" class="ratio-btn" onclick="setRatio(NaN, this)">
+          Serbest
+        </button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeCropModal()">
+          İptal
+        </button>
+        <button type="button" class="btn-apply" onclick="applyCrop()">
+          Kırpmayı Uygula
+        </button>
+      </div>
+    </div>
+
+    <!-- Tam Ekran Önizleme Modalı -->
+    <div id="previewModal">
+      <div class="modal-header">
+        <span class="modal-title">Son Kontrol (Önizleme)</span>
+        <span style="font-size: 12px; color: #8e8e93"
+          >iPhone'da basılı tutup da kaydedebilirsin</span
+        >
+      </div>
+      <div class="preview-stage">
+        <img id="fullPreviewImg" src="" alt="Tam Ekran Önizleme" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closePreviewModal()">
+          Kapat
+        </button>
+        <button
+          type="button"
+          class="btn-save"
+          style="flex: 1"
+          onclick="exportHD()"
+        >
+          Kaydet / İndir
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("renderCanvas");
+      const ctx = canvas.getContext("2d");
+      const previewImg = document.getElementById("previewImg");
+      const fullPreviewImg = document.getElementById("fullPreviewImg");
+      const textInput = document.getElementById("textInput");
+      const fontSlider = document.getElementById("fontSlider");
+      const fontVal = document.getElementById("fontVal");
+
+      let logoImg = new Image();
+      let hasLogo = false;
+      let rawPhotoSrc = null;
+      let croppedPhotoImg = null;
+      let cropper = null;
+      let currentRatio = 4 / 3;
+      let latestDataUrl = "";
+
+      const savedLogo = localStorage.getItem("st_logo_hd");
+      if (savedLogo) {
+        logoImg.onload = () => {
+          hasLogo = true;
+          renderCard();
+        };
+        logoImg.src = savedLogo;
+      }
+
+      document.getElementById("logoInput").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          localStorage.setItem("st_logo_hd", ev.target.result);
+          logoImg = new Image();
+          logoImg.onload = () => {
+            hasLogo = true;
+            renderCard();
+          };
+          logoImg.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      textInput.addEventListener("input", renderCard);
+      fontSlider.addEventListener("input", () => {
+        fontVal.textContent = fontSlider.value;
+        renderCard();
+      });
+
+      function clearText() {
+        textInput.value = "";
+        renderCard();
+      }
+
+      document.getElementById("photoInput").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          rawPhotoSrc = ev.target.result;
+          openCropModal();
+        };
+        reader.readAsDataURL(file);
+        e.target.value = "";
+      });
+
+      function openCropModal() {
+        if (!rawPhotoSrc) return;
+        const modal = document.getElementById("cropModal");
+        const target = document.getElementById("cropTarget");
+        modal.style.display = "flex";
+        target.src = rawPhotoSrc;
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(target, {
+          aspectRatio: currentRatio,
+          viewMode: 1,
+          dragMode: "move",
+          autoCropArea: 0.95,
+          guides: true,
+          center: true,
+          background: false,
+        });
+      }
+
+      function closeCropModal() {
+        document.getElementById("cropModal").style.display = "none";
+        if (cropper) {
+          cropper.destroy();
+          cropper = null;
+        }
+      }
+
+      function setRatio(ratio, btn) {
+        currentRatio = ratio;
+        if (cropper) cropper.setAspectRatio(ratio);
+        document
+          .querySelectorAll(".ratio-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+      }
+
+      function applyCrop() {
+        if (!cropper) return;
+        const c = cropper.getCroppedCanvas({ imageSmoothingQuality: "high" });
+        const img = new Image();
+        img.onload = () => {
+          croppedPhotoImg = img;
+          document.getElementById("selectPhotoBtn").textContent =
+            "Farklı Fotoğraf Seç";
+          document.getElementById("recropBtn").style.display = "block";
+          document.getElementById("removeBtn").style.display = "block";
+          closeCropModal();
+          renderCard();
+        };
+        img.src = c.toDataURL("image/jpeg", 0.96);
+      }
+
+      function removePhoto() {
+        croppedPhotoImg = null;
+        rawPhotoSrc = null;
+        document.getElementById("selectPhotoBtn").textContent =
+          "+ Fotoğraf Ekle";
+        document.getElementById("recropBtn").style.display = "none";
+        document.getElementById("removeBtn").style.display = "none";
+        renderCard();
+      }
+
+      function openPreviewModal() {
+        fullPreviewImg.src = latestDataUrl;
+        document.getElementById("previewModal").style.display = "flex";
+      }
+
+      function closePreviewModal() {
+        document.getElementById("previewModal").style.display = "none";
+      }
+
+      function wrapText(context, text, maxWidth) {
+        const paragraphs = text.split("\n");
+        const lines = [];
+        paragraphs.forEach((p) => {
+          if (p === "") {
+            lines.push("");
+            return;
+          }
+          const words = p.split(" ");
+          let currentLine = "";
+          for (let i = 0; i < words.length; i++) {
+            const testLine = currentLine
+              ? currentLine + " " + words[i]
+              : words[i];
+            if (context.measureText(testLine).width > maxWidth && currentLine) {
+              lines.push(currentLine);
+              currentLine = words[i];
+            } else {
+              currentLine = testLine;
+            }
+          }
+          lines.push(currentLine);
+        });
+        return lines;
+      }
+
+      function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+
+      function renderCard() {
+        const SCALE = 3;
+        const W = 540;
+        const PAD_X = 20;
+        const PAD_TOP = 18;
+        const PAD_BOT = 20;
+        const CONTENT_W = W - PAD_X * 2;
+        const fontSize = parseFloat(fontSlider.value);
+        const lineHeight = fontSize * 1.35;
+
+        const rawText = textInput.value.trim()
+          ? textInput.value
+          : "Shakhtar Donetsk, Stamford Bridge'de oynayacağı Şampiyonlar Ligi maçları için kombine satışı yaptı.\n\nBunların 20 binini Fenerbahçeli taraftarlar satın aldı. Maçta tribünler yarı yarıya olacak.\n\n🗞️ (Akşam)";
+
+        ctx.font = `400 ${fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif`;
+        const lines = wrapText(ctx, rawText, CONTENT_W);
+
+        const headerH = 46;
+        const textTop = PAD_TOP + headerH + 14;
+        const textBlockH = lines.length * lineHeight;
+
+        let photoH = 0;
+        let photoTop = textTop + textBlockH + 8;
+        if (croppedPhotoImg) {
+          const ratio = croppedPhotoImg.height / croppedPhotoImg.width;
+          photoH = Math.round(CONTENT_W * ratio);
+        }
+
+        const totalH = croppedPhotoImg
+          ? photoTop + photoH + PAD_BOT
+          : textTop + textBlockH + PAD_BOT - 4;
+
+        canvas.width = W * SCALE;
+        canvas.height = totalH * SCALE;
+        ctx.save();
+        ctx.scale(SCALE, SCALE);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, W, totalH);
+
+        const avatarSize = 46;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(
+          PAD_X + avatarSize / 2,
+          PAD_TOP + avatarSize / 2,
+          avatarSize / 2,
+          0,
+          Math.PI * 2,
+        );
+        ctx.closePath();
+        ctx.clip();
+        if (hasLogo) {
+          ctx.drawImage(logoImg, PAD_X, PAD_TOP, avatarSize, avatarSize);
+        } else {
+          ctx.fillStyle = "#facc15";
+          ctx.fillRect(PAD_X, PAD_TOP, avatarSize, avatarSize);
+        }
+        ctx.restore();
+
+        const nameX = PAD_X + avatarSize + 10;
+        const nameY = PAD_TOP + 20;
+        ctx.fillStyle = "#0f1419";
+        ctx.font =
+          '700 15.5px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif';
+        ctx.fillText("Sanal Tribün", nameX, nameY);
+
+        const nameWidth = ctx.measureText("Sanal Tribün").width;
+        const badgeX = nameX + nameWidth + 4;
+        const badgeY = PAD_TOP + 6.5;
+
+        ctx.save();
+        ctx.translate(badgeX, badgeY);
+        ctx.scale(17 / 24, 17 / 24);
+        ctx.fillStyle = "#1d9bf0";
+        const badgePath = new Path2D(
+          "M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z",
+        );
+        ctx.fill(badgePath);
+        ctx.restore();
+
+        ctx.fillStyle = "#536471";
+        ctx.font =
+          '400 14px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif';
+        ctx.fillText("@SanalTribun", nameX, PAD_TOP + 39);
+
+        ctx.fillStyle = "#536471";
+        const dotY = PAD_TOP + 16;
+        [W - PAD_X - 14, W - PAD_X - 8, W - PAD_X - 2].forEach((dx) => {
+          ctx.beginPath();
+          ctx.arc(dx, dotY, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.fillStyle = "#0f1419";
+        ctx.font = `400 ${fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif`;
+        lines.forEach((line, idx) => {
+          ctx.fillText(line, PAD_X, textTop + fontSize + idx * lineHeight);
+        });
+
+        if (croppedPhotoImg) {
+          ctx.save();
+          roundRect(ctx, PAD_X, photoTop, CONTENT_W, photoH, 14);
+          ctx.clip();
+          ctx.drawImage(croppedPhotoImg, PAD_X, photoTop, CONTENT_W, photoH);
+          ctx.strokeStyle = "#eff3f4";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        ctx.restore();
+
+        latestDataUrl = canvas.toDataURL("image/jpeg", 0.98);
+        previewImg.src = latestDataUrl;
+        if (document.getElementById("previewModal").style.display === "flex") {
+          fullPreviewImg.src = latestDataUrl;
+        }
+      }
+
+      function triggerDirectDownload(fileName) {
+        const link = document.createElement("a");
+        link.download = fileName;
+        link.href = latestDataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      function exportHD() {
+        const fileName = "sanal-tribun-" + Date.now() + ".jpg";
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (isMobile && navigator.share) {
+          canvas.toBlob(
+            async (blob) => {
+              const file = new File([blob], fileName, { type: "image/jpeg" });
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                  await navigator.share({ files: [file] });
+                  return;
+                } catch (err) {
+                  if (err.name === "AbortError") return;
+                }
+              }
+              triggerDirectDownload(fileName);
+            },
+            "image/jpeg",
+            0.98,
+          );
+        } else {
+          triggerDirectDownload(fileName);
+        }
+      }
+
+      renderCard();
+    </script>
+  </body>
+</html>
