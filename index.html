@@ -202,7 +202,7 @@
     display: none;
   }
 
-  /* Fotoğraf kırpma ekranı */
+  /* FOTOĞRAF KIRPMA EKRANI */
 
   #cropModal {
     display: none;
@@ -297,7 +297,7 @@
     cursor: pointer;
   }
 
-  /* Tam ekran önizleme */
+  /* TAM EKRAN ÖNİZLEME */
 
   #previewModal {
     display: none;
@@ -333,6 +333,7 @@
 <body>
 
 <div class="top-bar">
+
   <div class="brand">SANAL TRİBÜN</div>
 
   <label for="logoInput" class="pill-btn">
@@ -340,14 +341,17 @@
   </label>
 
   <input type="file" id="logoInput" accept="image/*">
+
 </div>
 
 <div class="card-wrap" onclick="openPreviewModal()">
+
   <img id="previewImg" src="" alt="Önizleme">
 
   <div class="zoom-badge">
     Büyütmek için dokun
   </div>
+
 </div>
 
 <canvas id="renderCanvas" style="display:none;"></canvas>
@@ -355,6 +359,7 @@
 <div class="panel">
 
   <div class="row-between">
+
     <label>Haber Metni</label>
 
     <button
@@ -364,6 +369,7 @@
     >
       Metni Temizle
     </button>
+
   </div>
 
   <textarea
@@ -374,10 +380,13 @@
   <div class="slider-grid">
 
     <div>
+
       <div class="row-between">
+
         <label>
           Yazı: <span id="fontVal">22</span> px
         </label>
+
       </div>
 
       <input
@@ -388,13 +397,17 @@
         step="0.5"
         value="22"
       >
+
     </div>
 
     <div>
+
       <div class="row-between">
+
         <label>
           Logo Zoom: %<span id="logoZoomVal">102</span>
         </label>
+
       </div>
 
       <input
@@ -405,6 +418,7 @@
         step="1"
         value="102"
       >
+
     </div>
 
   </div>
@@ -460,7 +474,7 @@
 
 </div>
 
-<!-- Fotoğraf kırpma ekranı -->
+<!-- FOTOĞRAF KIRPMA EKRANI -->
 
 <div id="cropModal">
 
@@ -477,7 +491,9 @@
   </div>
 
   <div class="crop-stage">
+
     <img id="cropTarget" src="" alt="">
+
   </div>
 
   <div class="ratio-bar">
@@ -546,7 +562,7 @@
 
 </div>
 
-<!-- Tam ekran önizleme -->
+<!-- TAM EKRAN ÖNİZLEME -->
 
 <div id="previewModal">
 
@@ -584,7 +600,7 @@
 
     <button
       type="button"
-      class="btn btn-save"
+      class="btn-save"
       style="flex:1;"
       onclick="exportHD()"
     >
@@ -623,7 +639,6 @@
 
   let cropper = null;
 
-  // Referans görseldeki fotoğraf oranı
   let currentRatio = 3 / 2;
 
   let latestDataUrl = '';
@@ -640,26 +655,41 @@
   // =========================================
 
   function getStorage(key) {
+
     try {
+
       return localStorage.getItem(key);
+
     } catch (error) {
+
       return null;
+
     }
+
   }
 
   function setStorage(key, value) {
+
     try {
+
       localStorage.setItem(key, value);
+
     } catch (error) {
+
       console.warn('Ayar kaydedilemedi:', error);
+
     }
+
   }
 
   const savedZoom = getStorage('st_logo_zoom_v3');
 
   if (savedZoom) {
+
     logoZoomSlider.value = savedZoom;
+
     logoZoomVal.textContent = logoZoomSlider.value;
+
   }
 
   const savedLogo = getStorage('st_logo_hd');
@@ -667,8 +697,11 @@
   if (savedLogo) {
 
     logoImg.onload = () => {
+
       hasLogo = true;
+
       renderCard();
+
     };
 
     logoImg.src = savedLogo;
@@ -692,14 +725,19 @@
 
         setStorage('st_logo_hd', ev.target.result);
 
-        logoImg = new Image();
+        const newLogo = new Image();
 
-        logoImg.onload = () => {
+        newLogo.onload = () => {
+
+          logoImg = newLogo;
+
           hasLogo = true;
+
           renderCard();
+
         };
 
-        logoImg.src = ev.target.result;
+        newLogo.src = ev.target.result;
 
       };
 
@@ -782,16 +820,23 @@
     if (!rawPhotoSrc) return;
 
     if (typeof Cropper === 'undefined') {
+
       alert('Fotoğraf kırpma kütüphanesi yüklenemedi.');
+
       return;
+
     }
 
     const modal = document.getElementById('cropModal');
+
     const target = document.getElementById('cropTarget');
 
     if (cropper) {
+
       cropper.destroy();
+
       cropper = null;
+
     }
 
     modal.style.display = 'flex';
@@ -833,7 +878,9 @@
     currentRatio = ratio;
 
     if (cropper) {
+
       cropper.setAspectRatio(ratio);
+
     }
 
     document.querySelectorAll('.ratio-btn')
@@ -884,6 +931,7 @@
   function removePhoto() {
 
     croppedPhotoImg = null;
+
     rawPhotoSrc = null;
 
     document.getElementById('selectPhotoBtn')
@@ -1007,7 +1055,7 @@
   function renderCard() {
 
     // ---------------------------------------
-    // REFERANS GÖRSEL ÖLÇÜLERİ
+    // CANVAS VE KENAR BOŞLUKLARI
     // ---------------------------------------
 
     const W = 540;
@@ -1017,12 +1065,21 @@
     const SCALE = EXPORT_WIDTH / W;
 
     const PAD_X = 14;
+
     const PAD_TOP = 12;
+
     const PAD_BOT = 6;
 
     const TEXT_W = 522;
 
-    const PHOTO_W = 496;
+    // Fotoğrafın sağ ve sol boşlukları eşit.
+    // Sol: 14 px
+    // Sağ: 14 px
+    // Fotoğraf genişliği: 512 px
+
+    const PHOTO_X = PAD_X;
+
+    const PHOTO_W = W - (PAD_X * 2);
 
     const PHOTO_RADIUS = 19;
 
@@ -1040,6 +1097,11 @@
     const lineHeight = fontSize * (26.5 / 22);
 
     const textSpacing = 0.45;
+
+    // Karakterlerin yatay genişliği %4.8 artırıldı.
+    // Dikey boyut değişmez.
+
+    const TEXT_SCALE_X = 1.048;
 
     const rawText = textInput.value.trim();
 
@@ -1062,7 +1124,11 @@
 
     setTextFont(fontSize, 400, textSpacing);
 
-    const lines = wrapText(ctx, rawText, TEXT_W);
+    const lines = wrapText(
+      ctx,
+      rawText,
+      TEXT_W / TEXT_SCALE_X
+    );
 
     const firstBaseline = 114.5 + (fontSize - 22);
 
@@ -1095,7 +1161,9 @@
     });
 
     const lastBaseline = positionedLines.length
+
       ? positionedLines[positionedLines.length - 1].y
+
       : PAD_TOP + avatarSize;
 
     // ---------------------------------------
@@ -1105,7 +1173,9 @@
     let photoH = 0;
 
     const photoTop = positionedLines.length
+
       ? lastBaseline + 24.5
+
       : PAD_TOP + avatarSize + 14;
 
     if (croppedPhotoImg) {
@@ -1123,8 +1193,11 @@
       ? photoTop + photoH + PAD_BOT
 
       : Math.max(
+
           PAD_TOP + avatarSize + PAD_BOT,
+
           lastBaseline + fontSize * 0.35 + PAD_BOT
+
         );
 
     // ---------------------------------------
@@ -1152,10 +1225,15 @@
     ctx.fillStyle = '#ffffff';
 
     ctx.fillRect(
+
       0,
+
       0,
+
       W,
+
       canvas.height / SCALE
+
     );
 
     // ---------------------------------------
@@ -1189,8 +1267,6 @@
       const zoom =
         parseFloat(logoZoomSlider.value) / 100;
 
-      // Logo oranını bozmadan daireyi doldur
-
       const coverScale = Math.max(
 
         avatarSize / logoImg.width,
@@ -1212,10 +1288,15 @@
       ctx.fillStyle = '#ffffff';
 
       ctx.fillRect(
+
         PAD_X,
+
         PAD_TOP,
+
         avatarSize,
+
         avatarSize
+
       );
 
       ctx.drawImage(
@@ -1292,8 +1373,11 @@
     ctx.translate(badgeX, badgeY);
 
     ctx.scale(
+
       badgeSize / 24,
+
       badgeSize / 24
+
     );
 
     ctx.fillStyle = '#1d9bf0';
@@ -1364,13 +1448,17 @@
 
     setTextFont(fontSize, 400, textSpacing);
 
+    ctx.save();
+
+    ctx.scale(TEXT_SCALE_X, 1);
+
     positionedLines.forEach(line => {
 
       ctx.fillText(
 
         line.text,
 
-        PAD_X,
+        PAD_X / TEXT_SCALE_X,
 
         line.y
 
@@ -1378,8 +1466,11 @@
 
     });
 
+    ctx.restore();
+
     // ---------------------------------------
     // HABER FOTOĞRAFI
+    // SAĞ VE SOL BOŞLUKLAR EŞİT
     // ---------------------------------------
 
     if (croppedPhotoImg) {
@@ -1390,7 +1481,7 @@
 
         ctx,
 
-        PAD_X,
+        PHOTO_X,
 
         photoTop,
 
@@ -1408,7 +1499,7 @@
 
         croppedPhotoImg,
 
-        PAD_X,
+        PHOTO_X,
 
         photoTop,
 
@@ -1550,8 +1641,6 @@
   // =========================================
 
   renderCard();
-
-  // Fontlar hazır olduğunda yeniden çiz
 
   if (document.fonts && document.fonts.ready) {
 
